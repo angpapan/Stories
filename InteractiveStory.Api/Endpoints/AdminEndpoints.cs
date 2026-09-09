@@ -23,7 +23,7 @@ public static class AdminEndpoints
         {
             var stories = await db.Stories
                 .AsNoTracking()
-                .Select(s => new { s.Id, s.Title, s.UpdatedAt })
+                .Select(s => new { s.Id, s.Title, s.Description, s.UpdatedAt })
                 .ToListAsync();
             return Results.Ok(stories);
         });
@@ -46,6 +46,7 @@ public static class AdminEndpoints
             {
                 Id = id,
                 Title = req.Title,
+                Description = req.Description,
                 Json = req.Json,
                 Password = req.Password,
                 MaxPlaythroughs = req.MaxPlaythroughs,
@@ -65,6 +66,7 @@ public static class AdminEndpoints
             if (story == null) return Results.NotFound();
 
             story.Title = req.Title;
+            story.Description = req.Description;
             story.Json = req.Json;
             story.Password = req.Password;
             story.MaxPlaythroughs = req.MaxPlaythroughs;
@@ -168,6 +170,7 @@ public static class AdminEndpoints
 public class CreateStoryRequest
 {
     public string Title { get; set; } = null!;
+    public string? Description { get; set; }
     public string Json { get; set; } = null!;
     public string? Password { get; set; }
     public int? MaxPlaythroughs { get; set; }
@@ -176,6 +179,7 @@ public class CreateStoryRequest
 public class UpdateStoryRequest
 {
     public string Title { get; set; } = null!;
+    public string? Description { get; set; }
     public string Json { get; set; } = null!;
     public string? Password { get; set; }
     public int? MaxPlaythroughs { get; set; }

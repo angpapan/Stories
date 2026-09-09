@@ -6,6 +6,7 @@ public class Story
 {
     public string Id { get; set; } = null!; // GUID or slug
     public string Title { get; set; } = null!;
+    public string? Description { get; set; }
     public string Json { get; set; } = null!;
     public string? Password { get; set; }
     public int? MaxPlaythroughs { get; set; }
