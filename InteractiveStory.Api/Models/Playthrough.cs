@@ -11,7 +11,7 @@ public enum PlaythroughStatus
 public class Playthrough
 {
     public Guid Id { get; set; }
-    public string StoryId { get; set; } = null!;
+    public Guid StoryId { get; set; }
     public string CurrentNodeId { get; set; } = null!;
     public PlaythroughStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }

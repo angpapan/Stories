@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { api, Node, Choice } from '../api';
 import { Image, Upload, X, Plus } from 'lucide-react';
 import ChoiceEditor from './ChoiceEditor';
@@ -11,9 +11,10 @@ interface NodeEditorProps {
   onClose: () => void;
   onAddNode: (node: Node) => void;
   onRenameNode: (oldId: string, newId: string) => void;
+  onDeleteNode: (nodeId: string) => void;
 }
 
-const NodeEditor: React.FC<NodeEditorProps> = ({ nodeId, allNodes, storyId, onUpdate, onClose, onAddNode, onRenameNode }) => {
+const NodeEditor: React.FC<NodeEditorProps> = ({ nodeId, allNodes, storyId, onUpdate, onClose, onAddNode, onRenameNode, onDeleteNode }) => {
   const [isEditingId, setIsEditingId] = useState(false);
   const [editIdValue, setEditIdValue] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,9 +98,23 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ nodeId, allNodes, storyId, onUp
             </span>
           )}
         </h3>
-        <button className="btn-icon mobile-only" onClick={onClose}>
-          <X size={20} />
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button 
+            className="btn-secondary btn-small" 
+            onClick={() => {
+              if (window.confirm('Are you sure you want to delete this node?')) {
+                onDeleteNode(node.id);
+              }
+            }}
+            style={{ color: '#ff4d4f', borderColor: '#ff4d4f' }}
+            title="Delete Node"
+          >
+            Delete
+          </button>
+          <button className="btn-icon mobile-only" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
       </div>
 
       <div className="form-group">

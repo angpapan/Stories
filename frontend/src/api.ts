@@ -16,7 +16,26 @@ export interface Story {
   id: string;
   title: string;
   description?: string;
+  password?: string;
+  passwordHint?: string;
+  maxPlaythroughs?: number;
   updatedAt?: string;
+}
+
+export interface PlaythroughHistory {
+  nodeId: string;
+  chosenChoiceId?: string;
+  answeredAt: string;
+  sequenceNumber: number;
+}
+
+export interface Playthrough {
+  id: string;
+  status: number; // 0 = InProgress, 1 = Completed
+  createdAt: string;
+  completedAt?: string;
+  currentNodeId: string;
+  history: PlaythroughHistory[];
 }
 
 // Backend JSON Models
@@ -45,9 +64,26 @@ interface StoryDefinition {
   nodes: Record<string, BackendNode>;
 }
 
+const fetchAdmin = (url: string, init?: RequestInit) => {
+  return fetch(url, { ...init, credentials: 'include' });
+};
+
 export const api = {
+  login: async (password: string): Promise<boolean> => {
+    const res = await fetchAdmin('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+    return res.ok;
+  },
+
+  logout: async (): Promise<void> => {
+    await fetchAdmin('/api/admin/logout', { method: 'POST' });
+  },
   getStories: async (): Promise<Story[]> => {
-    const res = await fetch('/api/admin/stories');
+    const res = await fetchAdmin('/api/admin/stories');
+    if (res.status === 401) throw new Error('Unauthorized');
     if (!res.ok) return [];
     return await res.json();
   },
@@ -60,7 +96,7 @@ export const api = {
       }
     };
     
-    const res = await fetch('/api/admin/stories', {
+    const res = await fetchAdmin('/api/admin/stories', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, description, json: JSON.stringify(defaultJson) })
@@ -69,7 +105,8 @@ export const api = {
   },
 
   getStoryNodes: async (storyId: string): Promise<Node[]> => {
-    const res = await fetch(`/api/admin/stories/${storyId}`);
+    const res = await fetchAdmin(`/api/admin/stories/${storyId}`);
+    if (res.status === 401) throw new Error('Unauthorized');
     if (!res.ok) return [];
     const story = await res.json();
     
@@ -128,12 +165,15 @@ export const api = {
       };
     });
 
-    await fetch(`/api/admin/stories/${story.id}`, {
+    await fetchAdmin(`/api/admin/stories/${story.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: story.title,
         description: story.description,
+        password: story.password || null,
+        passwordHint: story.passwordHint || null,
+        maxPlaythroughs: story.maxPlaythroughs || null,
         json: JSON.stringify(def)
       })
     });
@@ -142,12 +182,19 @@ export const api = {
   uploadMedia: async (storyId: string, file: File): Promise<string | null> => {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch(`/api/admin/stories/${storyId}/media`, {
+    const res = await fetchAdmin(`/api/admin/stories/${storyId}/media`, {
       method: 'POST',
       body: formData
     });
     if (!res.ok) return null;
     const data = await res.json();
     return data.url;
+  },
+
+  getPlaythroughs: async (storyId: string): Promise<Playthrough[]> => {
+    const res = await fetchAdmin(`/api/admin/stories/${storyId}/playthroughs`);
+    if (res.status === 401) throw new Error('Unauthorized');
+    if (!res.ok) return [];
+    return await res.json();
   }
 };

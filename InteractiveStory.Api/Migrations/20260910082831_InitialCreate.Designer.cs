@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InteractiveStory.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260909112727_AddStoryDescription")]
-    partial class AddStoryDescription
+    [Migration("20260910082831_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,8 +40,7 @@ namespace InteractiveStory.Api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("StoryId")
-                        .IsRequired()
+                    b.Property<Guid>("StoryId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -82,7 +81,8 @@ namespace InteractiveStory.Api.Migrations
 
             modelBuilder.Entity("InteractiveStory.Api.Models.Story", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
@@ -111,6 +111,46 @@ namespace InteractiveStory.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Stories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("e819b5c2-f170-4eb6-9280-928570e30d12"),
+                            CreatedAt = new DateTime(2026, 9, 9, 11, 36, 30, 0, DateTimeKind.Unspecified),
+                            Description = "Test <b>story</b> \n",
+                            Json = "{\"startNode\":\"start\",\"nodes\":{\"start\":{\"text\":\"New <b>Story</b>\",\"isEnding\":false,\"media\":[],\"choices\":[{\"id\":\"c-7dwemcw\",\"text\":\"Go up\",\"next\":\"up\",\"media\":[]},{\"id\":\"c-ymjrgmy\",\"text\":\"Go down\",\"next\":\"down\",\"media\":[]},{\"id\":\"c-wfz80t0\",\"text\":\"Go left\",\"next\":\"Left\",\"media\":[]},{\"id\":\"c-hatj1zf\",\"text\":\"Go right\",\"next\":\"right\",\"media\":[]}]},\"Left\":{\"text\":\"Left room\",\"isEnding\":false,\"media\":[],\"choices\":[{\"id\":\"c-a5li9pt\",\"text\":\"UP\",\"next\":\"UL-END\",\"media\":[]},{\"id\":\"c-eomy6ee\",\"text\":\"DOWN\",\"next\":\"DL\",\"media\":[]},{\"id\":\"c-sssocou\",\"text\":\"Right\",\"next\":\"start\",\"media\":[]}]},\"right\":{\"text\":\"Right room\",\"isEnding\":false,\"media\":[],\"choices\":[{\"id\":\"c-ptauk0f\",\"text\":\"<span style=\\\"color: red\\\">UP</span>\",\"next\":\"UR\",\"media\":[]},{\"id\":\"c-ch8c9ts\",\"text\":\"DOWN\",\"next\":\"DR\",\"media\":[]},{\"id\":\"c-ef9mtv7\",\"text\":\"LEFT\",\"next\":\"start\",\"media\":[]}]},\"up\":{\"text\":\"Up room\",\"isEnding\":false,\"media\":[],\"choices\":[{\"id\":\"c-h5vyuxr\",\"text\":\"Left\",\"next\":\"UL-END\",\"media\":[]},{\"id\":\"c-4aqymv3\",\"text\":\"Right\",\"next\":\"UR\",\"media\":[]},{\"id\":\"c-a5xl0pl\",\"text\":\"Down\",\"next\":\"start\",\"media\":[]}]},\"down\":{\"text\":\"Down room\",\"isEnding\":false,\"media\":[],\"choices\":[{\"id\":\"c-2gjqpn1\",\"text\":\"Left\",\"next\":\"DL\",\"media\":[]},{\"id\":\"c-mj6bp7g\",\"text\":\"Right\",\"next\":\"DR\",\"media\":[]},{\"id\":\"c-vovbuug\",\"text\":\"Up\",\"next\":\"start\",\"media\":[]}]},\"UL-END\":{\"text\":\"Up Left Room - The END\",\"isEnding\":true,\"media\":[],\"choices\":[]},\"DL\":{\"text\":\"Down Left Room\",\"isEnding\":false,\"media\":[],\"choices\":[{\"id\":\"c-wi1jeq3\",\"text\":\"Up\",\"next\":\"Left\",\"media\":[]},{\"id\":\"c-f9ww0vy\",\"text\":\"Right\",\"next\":\"down\",\"media\":[]}]},\"UR\":{\"text\":\"Up Right Room\",\"isEnding\":false,\"media\":[],\"choices\":[{\"id\":\"c-wo0sjkg\",\"text\":\"Left\",\"next\":\"up\",\"media\":[]},{\"id\":\"c-hcti6wp\",\"text\":\"Down\",\"next\":\"right\",\"media\":[]}]},\"DR\":{\"text\":\"Down Right Room\",\"isEnding\":false,\"media\":[],\"choices\":[{\"id\":\"c-nxncv8s\",\"text\":\"Up\",\"next\":\"right\",\"media\":[]},{\"id\":\"c-kdqenhp\",\"text\":\"Left\",\"next\":\"down\",\"media\":[]}]}}}",
+                            MaxPlaythroughs = 2,
+                            Password = "pass",
+                            Title = "Test",
+                            UpdatedAt = new DateTime(2026, 9, 10, 7, 48, 46, 0, DateTimeKind.Unspecified)
+                        });
+                });
+
+            modelBuilder.Entity("InteractiveStory.Api.Models.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("4c05e191-2c9e-4eb9-a7e1-881c15b14441"),
+                            Password = "admin",
+                            Username = "admin"
+                        });
                 });
 
             modelBuilder.Entity("InteractiveStory.Api.Models.Playthrough", b =>

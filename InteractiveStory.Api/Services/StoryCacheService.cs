@@ -11,14 +11,14 @@ namespace InteractiveStory.Api.Services;
 public class StoryCacheService
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ConcurrentDictionary<string, StoryDefinition> _cache = new();
+    private readonly ConcurrentDictionary<Guid, StoryDefinition> _cache = new();
 
     public StoryCacheService(IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
     }
 
-    public async Task<StoryDefinition?> GetStoryDefinitionAsync(string storyId)
+    public async Task<StoryDefinition?> GetStoryDefinitionAsync(Guid storyId)
     {
         if (_cache.TryGetValue(storyId, out var cachedDef))
         {
@@ -45,7 +45,7 @@ public class StoryCacheService
         return def;
     }
 
-    public void InvalidateCache(string storyId)
+    public void InvalidateCache(Guid storyId)
     {
         _cache.TryRemove(storyId, out _);
     }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, Story } from '../api';
-import { PlusCircle, Book } from 'lucide-react';
+import { PlusCircle, Book, Copy } from 'lucide-react';
 import '../index.css';
 
 const StoriesList: React.FC = () => {
@@ -12,6 +12,7 @@ const StoriesList: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.title = 'Admin - Stories';
     loadStories();
   }, []);
 
@@ -25,7 +26,7 @@ const StoriesList: React.FC = () => {
     if (!newTitle.trim()) return;
     
     const newStory = await api.createStory(newTitle, newDescription);
-    navigate(`/story/${newStory.id}`);
+    navigate(`/admin/story/${newStory.id}`);
   };
 
   return (
@@ -61,13 +62,27 @@ const StoriesList: React.FC = () => {
 
       <div className="stories-grid">
         {stories.map(story => (
-          <Link to={`/story/${story.id}`} key={story.id} className="story-card">
+          <Link to={`/admin/story/${story.id}`} key={story.id} className="story-card">
             <div className="story-card-icon">
               <Book size={32} />
             </div>
             <div className="story-card-content">
               <h3>{story.title}</h3>
               <p>{story.description}</p>
+              <div 
+                className="story-id" 
+                style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#666', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                onClick={(e) => {
+                  e.preventDefault(); // Prevent navigating to story editor
+                  navigator.clipboard.writeText(story.id);
+                  // Could use a toast here, but alert is simple
+                  alert('GUID copied to clipboard!');
+                }}
+                title="Click to copy ID"
+              >
+                <span>ID: {story.id}</span>
+                <Copy size={14} style={{ cursor: 'pointer' }} />
+              </div>
             </div>
           </Link>
         ))}

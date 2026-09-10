@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { api, Choice, Node } from '../api';
 import { Trash2, Link as LinkIcon, PlusCircle } from 'lucide-react';
 

@@ -1,5 +1,6 @@
 using InteractiveStory.Api.Data;
-using InteractiveStory.Api.Endpoints;
+using InteractiveStory.Api.Endpoints.Admin;
+using InteractiveStory.Api.Endpoints.Player;
 using InteractiveStory.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Configure Authentication
+builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Events.OnRedirectToLogin = context =>
+        {
+            context.Response.StatusCode = Microsoft.AspNetCore.Http.StatusCodes.Status401Unauthorized;
+            return System.Threading.Tasks.Task.CompletedTask;
+        };
+    });
+builder.Services.AddAuthorization();
 
 // Configure DB
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=InteractiveStory.db";
@@ -41,6 +54,9 @@ app.UseHttpsRedirection();
 
 // Serve static files for media (and the react app if in wwwroot)
 app.UseStaticFiles();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Register endpoints
 app.MapAdminEndpoints();
