@@ -26,6 +26,17 @@ builder.Services.AddAuthorization();
 
 // Configure DB
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=InteractiveStory.db";
+var dbMatch = System.Text.RegularExpressions.Regex.Match(connectionString, @"Data Source=(?<path>[^;]+)");
+if (dbMatch.Success)
+{
+    var dbPath = dbMatch.Groups["path"].Value;
+    var dbDir = Path.GetDirectoryName(dbPath);
+    if (!string.IsNullOrEmpty(dbDir) && !Directory.Exists(dbDir))
+    {
+        Directory.CreateDirectory(dbDir);
+    }
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlite(connectionString);
@@ -48,9 +59,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseHttpsRedirection();
 }
-
-app.UseHttpsRedirection();
 
 // Serve static files for media (and the react app if in wwwroot)
 app.UseStaticFiles();
