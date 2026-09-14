@@ -45,6 +45,7 @@ public static class AdminEndpoints
         group.MapDeleteStory();
         group.MapUploadStoryMedia();
         group.MapValidateStory();
+        group.MapDeletePlaythrough();
     }
 }
 

@@ -196,5 +196,14 @@ export const api = {
     if (res.status === 401) throw new Error('Unauthorized');
     if (!res.ok) return [];
     return await res.json();
+  },
+
+  deletePlaythrough: async (storyId: string, playthroughId: string): Promise<void> => {
+    const res = await fetchAdmin(`/api/admin/stories/${storyId}/playthroughs/${playthroughId}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok && res.status !== 204) {
+      throw new Error('Failed to delete playthrough');
+    }
   }
 };

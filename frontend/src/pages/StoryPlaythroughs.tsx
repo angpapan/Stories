@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api, Story, Playthrough, Node } from '../api';
-import { ArrowLeft, ChevronDown, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
 
 const StoryPlaythroughs: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -47,6 +47,20 @@ const StoryPlaythroughs: React.FC = () => {
     setExpandedId(expandedId === pid ? null : pid);
   };
 
+  const handleDelete = async (e: React.MouseEvent, pid: string) => {
+    e.stopPropagation();
+    if (!story) return;
+    if (window.confirm('Are you sure you want to delete this playthrough? This action cannot be undone.')) {
+      try {
+        await api.deletePlaythrough(story.id, pid);
+        setPlaythroughs(playthroughs.filter(p => p.id !== pid));
+      } catch (err) {
+        console.error(err);
+        alert('Failed to delete playthrough.');
+      }
+    }
+  };
+
   if (loading) return <div className="loading">Loading playthroughs...</div>;
   if (!story) return <div className="loading">Story not found.</div>;
 
@@ -79,7 +93,15 @@ const StoryPlaythroughs: React.FC = () => {
                     <strong> Status:</strong> <span style={{ color: p.status === 1 ? '#4ade80' : '#facc15' }}>{p.status === 1 ? 'Completed' : 'In Progress'}</span> |
                     <strong> Date:</strong> {new Date(p.createdAt).toLocaleString()}
                   </div>
-                  <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <button 
+                      onClick={(e) => handleDelete(e, p.id)}
+                      className="delete-btn"
+                      style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0.25rem' }}
+                      title="Delete Playthrough"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                     {expandedId === p.id ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                   </div>
                 </div>
