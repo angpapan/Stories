@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api, Story, Node } from '../api';
 import NodeEditor from '../components/NodeEditor';
-import { ArrowLeft, Plus, Eye, EyeOff, Copy } from 'lucide-react';
+import { ArrowLeft, Plus, Eye, EyeOff, Copy, FileJson } from 'lucide-react';
 
 const StoryEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,7 +14,8 @@ const StoryEditor: React.FC = () => {
   const [isEditingDesc, setIsEditingDesc] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importJson, setImportJson] = useState('');
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 2500);
@@ -108,6 +109,47 @@ const StoryEditor: React.FC = () => {
     } catch (e) {
       alert('Failed to save story.');
       console.error(e);
+    }
+  };
+
+  const handleImportJson = () => {
+    try {
+      const parsed = JSON.parse(importJson);
+      if (!Array.isArray(parsed)) {
+        alert('JSON must be an array of nodes.');
+        return;
+      }
+      
+      const importedNodes: Node[] = parsed.map(n => ({
+        id: n.id || `node-${Math.random().toString(36).substring(2, 9)}`,
+        storyId: story!.id,
+        text: n.text || 'Imported Node',
+        mediaUrl: n.mediaUrl,
+        choices: (n.choices || []).map((c: any) => ({
+          id: c.id || `c-${Math.random().toString(36).substring(2, 9)}`,
+          text: c.text || 'Choice',
+          targetNodeId: c.targetNodeId || null
+        }))
+      }));
+
+      setNodes(prev => {
+        const nextNodes = [...prev];
+        importedNodes.forEach(imported => {
+          const idx = nextNodes.findIndex(n => n.id === imported.id);
+          if (idx >= 0) {
+            nextNodes[idx] = imported;
+          } else {
+            nextNodes.push(imported);
+          }
+        });
+        return nextNodes;
+      });
+
+      setIsImportModalOpen(false);
+      setImportJson('');
+      showToast('Nodes imported successfully!');
+    } catch (e) {
+      alert('Invalid JSON. Please provide a valid JSON array of nodes.');
     }
   };
 
@@ -238,9 +280,14 @@ const StoryEditor: React.FC = () => {
         <div className={`nodes-sidebar ${selectedNodeId ? 'hide-on-mobile' : ''}`}>
           <div className="sidebar-header">
             <h3>Nodes</h3>
-            <button className="btn-icon" onClick={handleCreateNode} title="Add Node">
-              <Plus size={20} />
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className="btn-icon" onClick={() => setIsImportModalOpen(true)} title="Import JSON">
+                <FileJson size={20} />
+              </button>
+              <button className="btn-icon" onClick={handleCreateNode} title="Add Node">
+                <Plus size={20} />
+              </button>
+            </div>
           </div>
           <ul className="nodes-list">
             {nodes.map(node => (
@@ -282,6 +329,30 @@ const StoryEditor: React.FC = () => {
       </div>
       
       {toastMsg && <div className="elegant-toast">{toastMsg}</div>}
+
+      {isImportModalOpen && (
+        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div className="modal-content" style={{ background: '#222', padding: '1.5rem', borderRadius: '8px', width: '90%', maxWidth: '600px', display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid #444', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
+            <h3 style={{ margin: 0, color: '#fff' }}>Import Nodes via JSON</h3>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: '#aaa' }}>
+              Provide an array of nodes. Expected format:<br/>
+              <code style={{ background: '#111', padding: '0.5rem', display: 'block', marginTop: '0.5rem', borderRadius: '4px', whiteSpace: 'pre' }}>
+                {`[\n  { \n    "id": "node1", \n    "text": "Node text", \n    "choices": [\n      { "text": "Choice 1", "targetNodeId": "node2" }\n    ] \n  }\n]`}
+              </code>
+            </p>
+            <textarea
+              value={importJson}
+              onChange={e => setImportJson(e.target.value)}
+              placeholder="Paste JSON here..."
+              style={{ width: '100%', height: '300px', fontFamily: 'monospace', background: '#111', color: '#fff', border: '1px solid #444', borderRadius: '4px', padding: '0.5rem', resize: 'vertical' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button className="btn btn-secondary" onClick={() => { setIsImportModalOpen(false); setImportJson(''); }}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleImportJson}>Import</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
